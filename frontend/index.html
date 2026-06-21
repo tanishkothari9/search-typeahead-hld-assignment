@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SearchHLD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span><span class="live-dot"></span> LIVE</span>
+    <span>5 NODES</span>
+    <span>750 RING ENTRIES</span>
+    <span>100K QUERIES</span>
+    <span id="sbLatency">— ms p95</span>
+  </div>
+
+  <div class="page">
+
+    <!-- Hero -->
+    <header class="hero">
+      <p class="hero-eyebrow">HLD101 / SYSTEMS DESIGN / 2024</p>
+      <h1 class="hero-title">SEARCH<br>TYPE<span class="hero-accent">AHEAD</span></h1>
+      <div class="hero-rule"></div>
+      <p class="hero-desc">TRIE · CONSISTENT HASHING · TRENDING · BATCH WRITES</p>
+    </header>
+
+    <main>
+
+      <!-- 01 SEARCH -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-num">01</span>
+          <h2 class="section-title">TYPEAHEAD SEARCH</h2>
+        </div>
+
+        <div class="search-wrapper">
+          <div class="search-box" id="searchBox">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="TYPE TO SEARCH…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="search-right">
+              <div class="spinner" id="spinner"></div>
+              <button class="clear-btn" id="clearBtn">✕</button>
+            </div>
+          </div>
+
+          <div class="dropdown" id="dropdown" role="listbox">
+            <div class="dropdown-header">
+              <span>SUGGESTIONS</span>
+              <span class="dropdown-hint">↑↓ · ENTER</span>
+            </div>
+            <ul class="suggestion-list" id="suggestionList"></ul>
+            <div class="dropdown-footer" id="dropdownFooter"></div>
+          </div>
+        </div>
+
+        <div class="result-banner" id="resultBanner"></div>
+      </section>
+
+      <!-- 02 TRENDING -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-num">02</span>
+          <h2 class="section-title">TRENDING</h2>
+          <span class="section-meta" id="trendWindow"></span>
+        </div>
+        <div class="trending-chips" id="trendingChips">
+          <span class="empty-msg">SUBMIT SEARCHES TO SEE TRENDING.</span>
+        </div>
+      </section>
+
+      <!-- 03 METRICS -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-num">03</span>
+          <h2 class="section-title">LIVE METRICS</h2>
+          <button class="action-btn" id="refreshMetrics">↺ REFRESH</button>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="mc-value" id="metAvg">—</div>
+            <div class="mc-label">AVG LATENCY</div>
+            <div class="mc-bar"><div class="mc-fill" id="barAvg"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-value" id="metP95">—</div>
+            <div class="mc-label">P95 LATENCY</div>
+            <div class="mc-bar"><div class="mc-fill" id="barP95"></div></div>
+          </div>
+          <div class="metric-card mc-yellow">
+            <div class="mc-value" id="metHitRate">—</div>
+            <div class="mc-label">CACHE HIT RATE</div>
+            <div class="mc-bar"><div class="mc-fill" id="barHitRate"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-value" id="metHits">—</div>
+            <div class="mc-label">CACHE HITS</div>
+            <div class="mc-bar"><div class="mc-fill" id="barHits"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-value" id="metMisses">—</div>
+            <div class="mc-label">CACHE MISSES</div>
+            <div class="mc-bar"><div class="mc-fill" id="barMisses"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-value" id="metDbReads">—</div>
+            <div class="mc-label">TRIE READS</div>
+            <div class="mc-bar"><div class="mc-fill" id="barDbReads"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-value" id="metEvents">—</div>
+            <div class="mc-label">SEARCH EVENTS</div>
+            <div class="mc-bar"><div class="mc-fill" id="barEvents"></div></div>
+          </div>
+          <div class="metric-card mc-yellow">
+            <div class="mc-value" id="metAvoided">—</div>
+            <div class="mc-label">WRITES AVOIDED</div>
+            <div class="mc-bar"><div class="mc-fill" id="barAvoided"></div></div>
+          </div>
+          <div class="metric-card mc-yellow">
+            <div class="mc-value" id="metReduction">—</div>
+            <div class="mc-label">WRITE REDUCTION</div>
+            <div class="mc-bar"><div class="mc-fill" id="barReduction"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 RING -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-num">04</span>
+          <h2 class="section-title">CACHE RING</h2>
+          <span class="section-meta">SHA1 · 150 VNODES / NODE</span>
+        </div>
+        <div class="ring-legend" id="ringLegend">
+          <div class="empty-msg">LOADING…</div>
+        </div>
+        <div id="ringNodes" style="display:none"></div>
+      </section>
+
+      <!-- 05 DEBUG -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-num">05</span>
+          <h2 class="section-title">CACHE DEBUG</h2>
+        </div>
+        <div class="debug-box">
+          <div class="debug-input-row">
+            <span class="debug-prompt">$</span>
+            <input type="text" id="debugInput" placeholder="prefix (e.g. py)" class="debug-input" />
+            <button id="debugBtn" class="debug-run-btn">INSPECT →</button>
+          </div>
+          <pre class="debug-output" id="debugOutput">// GET /cache/debug?prefix=&lt;prefix&gt;</pre>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="page-footer">
+      SEARCHHLD · HLD101 · TRIE + CONSISTENT HASHING + TRENDING + BATCH WRITES
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
